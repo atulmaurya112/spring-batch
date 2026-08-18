@@ -13,6 +13,9 @@ import org.springframework.batch.infrastructure.item.ItemProcessor;
 import com.learn.batch.error.FailedRecord;
 import com.learn.batch.strategy.BulkUploadStrategy;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class BulkProcessor<T> implements ItemProcessor<Map<String, String>, T>, StepExecutionListener {
 
 	private final BulkUploadStrategy<T> strategy;
@@ -57,9 +60,21 @@ public class BulkProcessor<T> implements ItemProcessor<Map<String, String>, T>, 
 
 	@Override
 	public ExitStatus afterStep(StepExecution stepExecution) {
-		ExecutionContext context = stepExecution.getExecutionContext();
-		context.put("FAILED", new ArrayList<>(failedRecords));
-		return stepExecution.getExitStatus();
+
+	    log.info("Step completed. status={}, readCount={}, writeCount={}, skipCount={}, " +
+	             "readSkipCount={}, processSkipCount={}, writeSkipCount={}",
+	            stepExecution.getStatus(),
+	            stepExecution.getReadCount(),
+	            stepExecution.getWriteCount(),
+	            stepExecution.getSkipCount(),
+	            stepExecution.getReadSkipCount(),
+	            stepExecution.getProcessSkipCount(),
+	            stepExecution.getWriteSkipCount());
+
+	    ExecutionContext context = stepExecution.getExecutionContext();
+	    context.put("FAILED", new ArrayList<>(failedRecords));
+
+	    return stepExecution.getExitStatus();
 	}
 	
 }

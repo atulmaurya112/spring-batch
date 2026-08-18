@@ -33,6 +33,9 @@ public class BatchConfig {
 
 		return new StepBuilder("bulk-step", jobRepository).<Map<String, String>, Object>chunk(2)
 				.transactionManager(txManager)
+				.faultTolerant()
+				.skip(Exception.class)
+				.skipLimit(10)
 				.reader(r)
 				.processor(p)
 				.writer(w)
